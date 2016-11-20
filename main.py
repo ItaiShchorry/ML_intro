@@ -20,7 +20,6 @@ def main():
     # section B
     k = 10
     precision = runKnnAndReturnPrecision(train[:1000], train_labels[:1000], test, test_labels, k)
-    print(precision)
 
     pairs = np.array([np.array([(LA.norm(np.array(test[j]) - np.array(train[i])), train_labels[i])\
                       for i in range(5000)]) for j in range(test.shape[0])])
