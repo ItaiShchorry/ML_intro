@@ -16,7 +16,7 @@ def main():
     train_labels = labels[idx[:10000]]
     test = data[idx[10000:], :]
     test_labels = labels[idx[10000:]]
-
+    print("banko")
     # section B
     k = 10
     precision = runKnnAndReturnPrecision(train[:1000], train_labels[:1000], test, test_labels, k)
