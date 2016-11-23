@@ -70,15 +70,7 @@ def main():
     plt.axvline(0.25, -0.1,1.1,color = 'b')
     plt.axvline(0.5, -0.1, 1.1, color='b')
     plt.axvline(0.75, -0.1, 1.1, color='b')
-#    ax = plt.gca()
-#    l_025 = lns.Line2D((0.25, 0.25), (-0.1,1.1), ls='--')
-#    l_05 = lns.Line2D((0.5, 0.5), (-0.1,1.1), ls='--')
-#    l_075 = lns.Line2D((0.75, 0.75), (-0.1,1.1), ls='--')
 
-#    ax.add_line(l_025)
-#    ax.add_line(l_05)
-#    ax.add_line(l_075)
-    plt.axvline()
     k = 2
     intervals, besterror = find_best_interval(points[0], points[1], k)
     #for i in range(k):
@@ -86,24 +78,16 @@ def main():
     #    ax.add_line(l)
 
     plt.axvline(intervals[0][0], -0.1, 1.1, color = 'r')
-    plt.axvline(intervals[0][1], -0.1, 1.1, color='r')
-    plt.axvline(intervals[1][0], -0.1, 1.1, color='r')
-    plt.axvline(intervals[1][1], -0.1, 1.1, color='r')
+    plt.axvline(intervals[0][1], -0.1, 1.1, color = 'r')
+    plt.axvline(intervals[1][0], -0.1, 1.1, color = 'r')
+    plt.axvline(intervals[1][1], -0.1, 1.1, color = 'r')
+    plt.axhline(1.05, intervals[0][0], intervals[0][1], color = 'r')
+    plt.axhline(1.05, intervals[1][0], intervals[1][1], color='r')
 
-    #plt.show()
-
-    #try TODO
-#    a = [1,2,3,4,5]
-#    b = [2,4,6,8,10]
-#    c = [1,4,9,16,25]
-#    plt.subplot(212)
-#    plt.plot(a,b,'r',a,c,'b')
-#    plt.title('section c: blue - x, red - y')
-#    plt.show()
 
     #section c
     k=2
-    m=[i for i in range(10,25,5)] #TODO
+    m=[i for i in range(10,25,5)] #TODO change the high limit from 25 to 105
     T=100
     experiments = np.array([[0.1 for i in range (T)],[0.1 for i in range (T)]]) # true error, empirical error, m[i]
     Cplot_array = np.array([[0.1 for i in range (len(m))],[0.1 for i in range (len(m))]])
@@ -113,7 +97,7 @@ def main():
             intervals, besterror = find_best_interval(points[0], points[1], k)
             experiments[0][j] = calcTrueError(intervals)
             experiments[1][j] = calcEmpiricalError(intervals, points)
-        print ("mean for: ",m[i]," true error: ",experiments[0][i]," empirical error: ",experiments[1][j])
+        print ("mean for: ",m[i]," true error: ",experiments[0][i]," empirical error: ",experiments[1][j]) #TODO
         (Cplot_array[0][i]), Cplot_array[1][i] = np.mean(experiments, axis = 1)
 
     plt.figure(2)
@@ -139,35 +123,36 @@ def main():
     plt.ylabel('error')
 
     #section e
-    T = 100
+    T = 10 #TODO change to 100
     experiments = np.array([[0.1 for i in range(T)], [0.1 for i in range(T)]])  # true error, empirical error, m[i]
     Eplot_array = np.array([[0.1 for i in range(1,max_k+1)], [0.1 for i in range(1,max_k+1)]])
-    for i in range(1,max_k+1):
+    for i in range(max_k):
         for j in range(T):
             points = generatePoints(m)
             intervals, besterror = find_best_interval(points[0], points[1], k_array[i])
             experiments[0][j] = calcTrueError(intervals)
             experiments[1][j] = calcEmpiricalError(intervals, points)
-        print ("mean for k=: ", k_array[i], " true error: ", experiments[0][i], " empirical error: ", experiments[1][j])#TODO
         Eplot_array[0][i], Eplot_array[1][i] = np.mean(experiments, axis=1)
+        print ("mean for k=: ", k_array[i], " true error: ", Eplot_array[0][i], " empirical error: ", Eplot_array[1][i])  # TODO
 
     plt.figure(4)
     plt.plot(k_array,Eplot_array[0],'r',k_array,Eplot_array[1],'b')
     plt.title('section e: red - true error, blue - empirical error')
     plt.xlabel('k')
     plt.ylabel('error')
-    plt.show()
+
 
     #section f
     #choosing 5-fold cross validation for determining k
+    k_fold = 10 #TODO change to 5
     indexes = np.array([i for i in range(m)])
     random.shuffle(indexes)
     error_array = [i for i in range (max_k)]
-    for k in range (1,21):
+    for k in range (1,21,5): #TODO remove the 5 step
         comulative_error = 0.0
-        for i in range (0,50,5):
-            train = [[points[0] for j in range(m) if j not in indexes[i:i+5]],[points[1] for j in range(m) if j not in indexes[i:i+5]]]#TODO
-            test = [[points[0] for j in indexes[i:i+5]],[points[1] for j in indexes[i:i+5]]]
+        for i in range (0,50,k_fold):
+            train = [[points[0] for j in range(m) if j not in indexes[i:i+k_fold]],[points[1] for j in range(m) if j not in indexes[i:i+k_fold]]]
+            test = [[points[0] for j in indexes[i:i+k_fold]],[points[1] for j in indexes[i:i+k_fold]]]
             intervals, besterror = find_best_interval(points[0], points[1], k)
             comulative_error += calcEmpiricalError(intervals, points)
         error_array[1][k-1] = comulative_error / 10
@@ -248,7 +233,7 @@ def calcEmpiricalError(intervals,points):
     m = len(points[0])
     count = 0
 
-    while (interval_index < len_f - 1 and sample_index < m):
+    while (interval_index < len_f - 2 and sample_index < m):
         while (points[0][sample_index] > flattend_intervals[interval_index + 1]):
             interval_index += 1
         estimation = interval_index % 2
