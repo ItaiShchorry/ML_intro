@@ -59,30 +59,206 @@ def find_best_interval(xs, ys, k):
     return intervals, besterror
 
 def main():
+    #section a
     points = generatePoints(100)
+    plt.figure(1)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('section a')
     plt.plot(points[0], points[1], 'ro')
-    plt.axis([0, 1, -0., 1.1])
-    ax = plt.gca()
-    l1 = lns.Line2D((0.25, 0.25), (-0.1,1.1), ls='--')
-    l2 = lns.Line2D((0.5, 0.5), (-0.1,1.1), ls='--')
-    l3 = lns.Line2D((0.75, 0.75), (-0.1,1.1), ls='--')
-    ax.add_line(l1)
-    ax.add_line(l2)
-    ax.add_line(l3)
-    #plt.show()
-    k = 10
-    intervals, besterror = find_best_interval(points[0], points[1], k)
-    for i in range(k):
-        l = lns.Line2D((intervals[i][0], intervals[i][1]), (0.05, 0.05), ls='-')
-        ax.add_line(l)
-    plt.show()
+    plt.axis([0, 1, -0.1, 1.1])
+    plt.axvline(0.25, -0.1,1.1,color = 'b')
+    plt.axvline(0.5, -0.1, 1.1, color='b')
+    plt.axvline(0.75, -0.1, 1.1, color='b')
+#    ax = plt.gca()
+#    l_025 = lns.Line2D((0.25, 0.25), (-0.1,1.1), ls='--')
+#    l_05 = lns.Line2D((0.5, 0.5), (-0.1,1.1), ls='--')
+#    l_075 = lns.Line2D((0.75, 0.75), (-0.1,1.1), ls='--')
 
-def generatePoints(num_of_points):
-    x = np.random.uniform(0, 1, num_of_points)
+#    ax.add_line(l_025)
+#    ax.add_line(l_05)
+#    ax.add_line(l_075)
+    plt.axvline()
+    k = 2
+    intervals, besterror = find_best_interval(points[0], points[1], k)
+    #for i in range(k):
+    #    l = lns.Line2D((intervals[i][0], intervals[i][1]), (0.05, 0.05), ls='-')
+    #    ax.add_line(l)
+
+    plt.axvline(intervals[0][0], -0.1, 1.1, color = 'r')
+    plt.axvline(intervals[0][1], -0.1, 1.1, color='r')
+    plt.axvline(intervals[1][0], -0.1, 1.1, color='r')
+    plt.axvline(intervals[1][1], -0.1, 1.1, color='r')
+
+    #plt.show()
+
+    #try TODO
+#    a = [1,2,3,4,5]
+#    b = [2,4,6,8,10]
+#    c = [1,4,9,16,25]
+#    plt.subplot(212)
+#    plt.plot(a,b,'r',a,c,'b')
+#    plt.title('section c: blue - x, red - y')
+#    plt.show()
+
+    #section c
+    k=2
+    m=[i for i in range(10,25,5)] #TODO
+    T=100
+    experiments = np.array([[0.1 for i in range (T)],[0.1 for i in range (T)]]) # true error, empirical error, m[i]
+    Cplot_array = np.array([[0.1 for i in range (len(m))],[0.1 for i in range (len(m))]])
+    for i in range (len(m)):
+        for j in range (T):
+            points = generatePoints(m[i])
+            intervals, besterror = find_best_interval(points[0], points[1], k)
+            experiments[0][j] = calcTrueError(intervals)
+            experiments[1][j] = calcEmpiricalError(intervals, points)
+        print ("mean for: ",m[i]," true error: ",experiments[0][i]," empirical error: ",experiments[1][j])
+        (Cplot_array[0][i]), Cplot_array[1][i] = np.mean(experiments, axis = 1)
+
+    plt.figure(2)
+    plt.plot(m,Cplot_array[0],'r',m,Cplot_array[1],'b')
+    plt.title('section c: red - true error, blue - empirical error')
+    plt.xlabel('samples number')
+    plt.ylabel('error')
+
+    #section D
+    max_k = 20
+    k_array = [i for i in range(1,max_k+1)]
+    error_array = [0.0 for i in range(max_k)]
+    m = 50
+    points = generatePoints(m)
+    for i in range(max_k):
+        intervals, besterror = find_best_interval(points[0], points[1], k_array[i])
+        error_array[i] = calcEmpiricalError(intervals,points)
+
+    plt.figure(3)
+    plt.plot(k_array,error_array)
+    plt.title('section d')
+    plt.xlabel('k')
+    plt.ylabel('error')
+
+    #section e
+    T = 100
+    experiments = np.array([[0.1 for i in range(T)], [0.1 for i in range(T)]])  # true error, empirical error, m[i]
+    Eplot_array = np.array([[0.1 for i in range(1,max_k+1)], [0.1 for i in range(1,max_k+1)]])
+    for i in range(1,max_k+1):
+        for j in range(T):
+            points = generatePoints(m)
+            intervals, besterror = find_best_interval(points[0], points[1], k_array[i])
+            experiments[0][j] = calcTrueError(intervals)
+            experiments[1][j] = calcEmpiricalError(intervals, points)
+        print ("mean for k=: ", k_array[i], " true error: ", experiments[0][i], " empirical error: ", experiments[1][j])#TODO
+        Eplot_array[0][i], Eplot_array[1][i] = np.mean(experiments, axis=1)
+
+    plt.figure(4)
+    plt.plot(k_array,Eplot_array[0],'r',k_array,Eplot_array[1],'b')
+    plt.title('section e: red - true error, blue - empirical error')
+    plt.xlabel('k')
+    plt.ylabel('error')
+    plt.show() #TODO
+
+    #section f
+    #choosing 5-fold cross validation for determining k
+    indexes = np.array([i for i in range(m)])
+    random.shuffle(indexes)
+    error_array = [i for i in range (max_k)]
+    for k in range (1,21):
+        comulative_error = 0.0
+        for i in range (0,50,5):
+            train = [[points[0] for j in range(m) if j not in indexes[i:i+5]],[points[1] for j in range(m) if j not in indexes[i:i+5]]]#TODO
+            test = [[points[0] for j in indexes[i:i+5]],[points[1] for j in indexes[i:i+5]]]
+            intervals, besterror = find_best_interval(points[0], points[1], k)
+            comulative_error += calcEmpiricalError(intervals, points)
+        error_array[1][k-1] = comulative_error / 10
+
+    plt.figure(5)
+    plt.title('section f: 5-fold cross validation')
+    plt.plot(k_array,error_array)
+    plt.xlabel('k')
+    plt.ylabel('averaged error')
+    plt.show() #TODO
+
+
+def generatePoints(m):
+    x = np.random.uniform(0, 1, m)
     x = np.sort(x)
     n = 1
     y = np.array([np.random.binomial(n, 0.8) if (xi >= 0 and xi <= 0.25) or (xi >= 0.5 and xi <= 0.75) else np.random.binomial(n, 0.1) for xi in x])
     return [x, y]
+
+#Section b
+def calcTrueError(intervals):
+    num_of_intervals = len(intervals)
+    flattend_intervals = [0.1 for i in range (2*num_of_intervals + 2)]
+    flattend_intervals[0] = 0.0
+    for i in range(num_of_intervals):
+        flattend_intervals[2*i + 1] = intervals[i][0]
+        flattend_intervals[2*i + 2] = intervals[i][1]
+    flattend_intervals[-1] = 1.0
+
+    true_error = 0
+    i = 0
+    # calcultaing true errors. i % 2 == 1: right side of an interval. i % 2 == 0: left side
+    # 0-0.25
+    while (flattend_intervals[i]<0.25):
+        i += 1
+        error_possibility = 0.8 if (i % 2 == 1) else 0.2
+        true_error += error_possibility * ( min(flattend_intervals[i],0.25)-flattend_intervals[i - 1])
+
+    # 0.25-0.5
+    error_possibility = 0.1 if (i % 2 == 1) else 0.9
+    true_error += error_possibility * (min(flattend_intervals[i],0.5) - 0.25)
+    while (flattend_intervals[i] < 0.5): #
+        i += 1
+        error_possibility = 0.1 if (i % 2 == 1) else 0.9
+        true_error += error_possibility * (min(flattend_intervals[i], 0.5) - flattend_intervals[i - 1])
+
+    # 0.5-0.75
+    error_possibility = 0.8 if (i % 2 == 1) else 0.2
+    true_error += error_possibility * (min(flattend_intervals[i], 0.75) - 0.5)
+    while (flattend_intervals[i] < 0.75):
+        i += 1
+        error_possibility = 0.8 if (i % 2 == 1) else 0.2
+        true_error += error_possibility * (min(flattend_intervals[i], 0.75) - flattend_intervals[i - 1])
+
+    #0.75-1
+    error_possibility = 0.1 if (i % 2 == 1) else 0.9
+    true_error += error_possibility * (min(flattend_intervals[i], 1) - 0.75)
+    while (flattend_intervals[i] < 1):  #
+        i += 1
+        error_possibility = 0.1 if (i % 2 == 1) else 0.9
+        true_error += error_possibility * (min(flattend_intervals[i], 1) - flattend_intervals[i - 1])
+
+    return true_error
+
+
+def calcEmpiricalError(intervals,points):
+    num_of_intervals = len(intervals)
+    flattend_intervals = [0.1 for i in range(2 * num_of_intervals + 2)]
+    flattend_intervals[0] = 0.0
+    for i in range(num_of_intervals):
+        flattend_intervals[2 * i + 1] = intervals[i][0]
+        flattend_intervals[2 * i + 2] = intervals[i][1]
+    flattend_intervals[-1] = 1.0
+
+    interval_index = 0
+    sample_index = 0
+    len_f = len(flattend_intervals)
+    m = len(points[0])
+    count = 0
+
+    while (interval_index < len_f - 1 and sample_index < m):
+        while (points[0][sample_index] > flattend_intervals[interval_index + 1]):
+            interval_index += 1
+        estimation = interval_index % 2
+        if estimation != points[1][sample_index]:
+            count += 1
+        sample_index += 1
+
+    return (float(count) / m)
+
+
 
 if __name__ == '__main__':
     sys.exit(main())
