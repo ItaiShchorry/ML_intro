@@ -156,7 +156,7 @@ def main():
     plt.title('section e: red - true error, blue - empirical error')
     plt.xlabel('k')
     plt.ylabel('error')
-    plt.show() #TODO
+    plt.show()
 
     #section f
     #choosing 5-fold cross validation for determining k
