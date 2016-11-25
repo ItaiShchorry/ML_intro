@@ -172,6 +172,7 @@ def generatePoints(m):
     y = np.array([np.random.binomial(n, 0.8) if (xi >= 0 and xi <= 0.25) or (xi >= 0.5 and xi <= 0.75) else np.random.binomial(n, 0.1) for xi in x])
     return [x, y]
 
+
 #Section b
 def calcTrueError(intervals):
     num_of_intervals = len(intervals)
