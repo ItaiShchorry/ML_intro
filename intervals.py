@@ -147,7 +147,7 @@ def main():
     k_fold = 10 #TODO change to 5
     indexes = np.array([i for i in range(m)])
     random.shuffle(indexes)
-    error_array = [i for i in range (max_k)]
+    error_array = [0.0 for i in range (max_k)]
     for k in range (1,21,5): #TODO remove the 5 step
         comulative_error = 0.0
         for i in range (0,50,k_fold):
@@ -155,7 +155,7 @@ def main():
             test = [[points[0] for j in indexes[i:i+k_fold]],[points[1] for j in indexes[i:i+k_fold]]]
             intervals, besterror = find_best_interval(points[0], points[1], k)
             comulative_error += calcEmpiricalError(intervals, points)
-        error_array[1][k-1] = comulative_error / 10
+        error_array[k-1] = comulative_error / 10
 
     plt.figure(5)
     plt.title('section f: 5-fold cross validation')
