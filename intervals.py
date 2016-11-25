@@ -35,8 +35,8 @@ def find_best_interval(xs, ys, k):
             # 0 (Before first point), 1 (after first point, before second), ..., m (after last point)
             options = []
             for l in range(0, i + 1):
-                next_errors = E[l, j - 1] + (cy[i] - cy[l]) + concatenate(
-                    [[0], cumsum((-1) ** (ys[arange(l, i)] == 1))])
+                next_errors = E[l, j - 1] + (cy[i] - cy[l]) +\
+                              concatenate([[0], cumsum((-1) ** (ys[arange(l, i)] == 1))])
                 min_error = argmin(next_errors)
                 options.append((next_errors[min_error], (l, arange(l, i + 1)[min_error])))
 
@@ -135,8 +135,7 @@ def main():
             experiments[0][j] = calcTrueError(intervals)
             experiments[1][j] = calcEmpiricalError(intervals, points)
         Eplot_array[0][i], Eplot_array[1][i] = np.mean(experiments, axis=1)
-        print("mean for k=: ", k_array[i], " true error: ", Eplot_array[0][i], " empirical error: ",
-              Eplot_array[1][i])  # TODO
+        print("mean for k=: ", k_array[i], " true error: ", Eplot_array[0][i], " empirical error: ", Eplot_array[1][i])  # TODO
 
     plt.figure(4)
     plt.plot(k_array, Eplot_array[0], 'r', k_array, Eplot_array[1], 'b')
@@ -153,9 +152,8 @@ def main():
     for k in range(1, 21, 5):  # TODO remove the 5 step
         comulative_error = 0.0
         for i in range(0, 50, k_fold):
-            #train = [[points[0] for j in range(m) if j not in indexes[i:i + k_fold]],
-            #         [points[1] for j in range(m) if j not in indexes[i:i + k_fold]]]
-            #test = [[points[0] for j in indexes[i:i + k_fold]], [points[1] for j in indexes[i:i + k_fold]]]
+            train = [[points[0] for j in range(m) if j not in indexes[i:i + k_fold]], [points[1] for j in range(m) if j not in indexes[i:i + k_fold]]]
+            test = [[points[0] for j in indexes[i:i + k_fold]], [points[1] for j in indexes[i:i + k_fold]]]
             intervals, besterror = find_best_interval(points[0], points[1], k)
             comulative_error += calcEmpiricalError(intervals, points)
         error_array[1][k - 1] = comulative_error / 10
