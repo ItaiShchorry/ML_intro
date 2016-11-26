@@ -64,7 +64,7 @@ def main():
     plt.figure(1)
     plt.xlabel('x')
     plt.ylabel('y')
-    plt.title('section a')
+    plt.title('section a: blue - 0.25,0,5-0,75 markers, red - intervals')
     plt.plot(points[0], points[1], 'ro')
     plt.axis([0, 1, -0.1, 1.1])
     plt.axvline(0.25, -0.1,1.1,color = 'b')
@@ -77,17 +77,17 @@ def main():
     #    l = lns.Line2D((intervals[i][0], intervals[i][1]), (0.05, 0.05), ls='-')
     #    ax.add_line(l)
 
-    plt.axvline(intervals[0][0], -0.1, 1.1, color = 'r')
-    plt.axvline(intervals[0][1], -0.1, 1.1, color = 'r')
-    plt.axvline(intervals[1][0], -0.1, 1.1, color = 'r')
-    plt.axvline(intervals[1][1], -0.1, 1.1, color = 'r')
+    plt.axvline(intervals[0][0], -0.1, 1.05, color = 'r')
+    plt.axvline(intervals[0][1], -0.1, 1.05, color = 'r')
+    plt.axvline(intervals[1][0], -0.1, 1.05, color = 'r')
+    plt.axvline(intervals[1][1], -0.1, 1.05, color = 'r')
     plt.axhline(1.05, intervals[0][0], intervals[0][1], color = 'r')
     plt.axhline(1.05, intervals[1][0], intervals[1][1], color='r')
 
 
     #section c
     k=2
-    m=[i for i in range(10,25,5)] #TODO change the high limit from 25 to 105
+    m=[i for i in range(10,105,5)] #TODO change the high limit from 25 to 105
     T=100
     experiments = np.array([[0.1 for i in range (T)],[0.1 for i in range (T)]]) # true error, empirical error, m[i]
     Cplot_array = np.array([[0.1 for i in range (len(m))],[0.1 for i in range (len(m))]])
@@ -123,7 +123,7 @@ def main():
     plt.ylabel('error')
 
     #section e
-    T = 10 #TODO change to 100
+    T = 100 #TODO change to 100
     experiments = np.array([[0.1 for i in range(T)], [0.1 for i in range(T)]])  # true error, empirical error, m[i]
     Eplot_array = np.array([[0.1 for i in range(1,max_k+1)], [0.1 for i in range(1,max_k+1)]])
     for i in range(max_k):
@@ -144,18 +144,36 @@ def main():
 
     #section f
     #choosing 5-fold cross validation for determining k
-    k_fold = 10 #TODO change to 5
+    k_fold = 5 #TODO change to 5
+    points = generatePoints(m)
     indexes = np.array([i for i in range(m)])
     random.shuffle(indexes)
+    train = [np.array([0.0 for i in range(m - k_fold)]),np.array([0 for i in range(m - k_fold)])]
+    test = [np.array([0.0 for i in range(k_fold)]), np.array([0 for i in range(k_fold)])]
     error_array = [0.0 for i in range (max_k)]
-    for k in range (1,21,5): #TODO remove the 5 step
+    for k in range (1,21): #TODO remove the 5 step
         comulative_error = 0.0
         for i in range (0,50,k_fold):
-            train = [[points[0] for j in range(m) if j not in indexes[i:i+k_fold]],[points[1] for j in range(m) if j not in indexes[i:i+k_fold]]]
-            test = [[points[0] for j in indexes[i:i+k_fold]],[points[1] for j in indexes[i:i+k_fold]]]
-            intervals, besterror = find_best_interval(points[0], points[1], k)
-            comulative_error += calcEmpiricalError(intervals, points)
-        error_array[k-1] = comulative_error / 10
+            train_index = 0
+            test_index = 0
+            for j in range(m):
+                if j not in indexes[i:i+k_fold]:
+                    train[0][train_index], train[1][train_index] = points[0][j], points[1][j]
+                    train_index+=1
+                else:
+                    test[0][test_index], test[1][test_index] = points[0][j], points[1][j]
+                    test_index += 1
+            #print ('points is', points)
+            #print ('train is', train)
+            #print ('test is', test)
+            #print ('indexes is', indexes)
+            #print ('indexes i:i+k_fold is', indexes[i:i+k_fold])
+            #train = [np.array([points[0][j] for j in range(m) if j not in indexes[i:i+k_fold]]),np.array([points[1][j] for j in range(m) if j not in indexes[i:i+k_fold]])]
+            #test = [np.array([points[0][j] for j in indexes[i:i+k_fold]]),np.array([points[1][j] for j in indexes[i:i+k_fold]])]
+            intervals, besterror = find_best_interval(train[0], train[1], k)
+            comulative_error += calcEmpiricalError(intervals, test)
+        error_array[k-1] = comulative_error*k_fold / m
+        print ("finished ", k_fold, " fold validation for k=", k ," with error: ", error_array[k-1])  # TODO
 
     plt.figure(5)
     plt.title('section f: 5-fold cross validation')
