@@ -1,10 +1,9 @@
 import sys
-from sklearn.datasets import fetch_mldata
 import numpy.random
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
-
+from sklearn.datasets import fetch_mldata
 
 def main():
     mnist = fetch_mldata('MNIST original')
@@ -85,7 +84,6 @@ def sectionsCandD(pairs, test_labels, k, num_of_training):
             cnt += 1
     return float(cnt) / test_labels.shape[0]
 
-
 def knn_estimate(images, labels, query, k):
     dists_and_labels = np.array(
         [(LA.norm(np.array(query) - np.array(images[i])), labels[i]) for i in range(len(labels))])
@@ -94,17 +92,11 @@ def knn_estimate(images, labels, query, k):
     counts = np.bincount(neighbors)
     return np.argmax(counts)
 
-
 def knn_with_pairs_ready(k, pairs):
     dists_and_labels_ordered = pairs[np.argsort(pairs[:, 0])]
     neighbors = np.array([int(dists_and_labels_ordered[i][1]) for i in range(k)])
     counts = np.bincount(neighbors)
     return np.argmax(counts)
-
-
-def distAndLabel(image, label, test):
-    return (LA.norm(np.array(test) - np.array(image)), label)
-
 
 if __name__ == '__main__':
     sys.exit(main())
