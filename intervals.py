@@ -143,7 +143,7 @@ def main():
 
 
     #section f
-    #choosing 5-fold cross validation for determining k
+    #choosing 10-fold cross validation (5 samples each) for determining k
     k_fold = 5 #TODO change to 5
     points = generatePoints(m)
     indexes = np.array([i for i in range(m)])
@@ -173,10 +173,10 @@ def main():
             intervals, besterror = find_best_interval(train[0], train[1], k)
             comulative_error += calcEmpiricalError(intervals, test)
         error_array[k-1] = comulative_error*k_fold / m
-        print ("finished ", k_fold, " fold validation for k=", k ," with error: ", error_array[k-1])  # TODO
+        print ("finished ", k_fold / m , " fold validation for k=", k ," with error: ", error_array[k-1])  # TODO
 
     plt.figure(5)
-    plt.title('section f: 5-fold cross validation')
+    plt.title('section f: 10-fold cross validation') #TODO notice
     plt.plot(k_array,error_array)
     plt.xlabel('k')
     plt.ylabel('averaged error')
