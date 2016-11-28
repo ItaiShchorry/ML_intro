@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from numpy import linalg as LA
 from sklearn.datasets import fetch_mldata
 
+
 def main():
     mnist = fetch_mldata('MNIST original')
     data = mnist['data']
@@ -15,14 +16,17 @@ def main():
     test = data[idx[10000:], :]
     test_labels = labels[idx[10000:]]
 
+    trainT = train[:]*0.1
+    testT = test[:]*0.1
+
     # section B
     k = 10
-    precision = runKnnAndReturnPrecision(train[:1000], train_labels[:1000], test, test_labels, k)
+    precision = runKnnAndReturnPrecision(trainT[:1000], train_labels[:1000], testT, test_labels, k)
     print('Precision for section B:', precision)
 
     # Creating all pairs of distances of the training pictures with the test pictures
     # It will save running time for sections C and D.
-    pairs = np.array([np.array([(LA.norm(np.array(test[j]) - np.array(train[i])), train_labels[i]) \
+    pairs = np.array([np.array([(LA.norm(np.array(testT[j]) - np.array(trainT[i])), train_labels[i]) \
                                 for i in range(5000)]) for j in range(test.shape[0])])
 
     # Plotting configurations for sections C and D.
