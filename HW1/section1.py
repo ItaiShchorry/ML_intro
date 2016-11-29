@@ -1,6 +1,8 @@
 import sys
 import numpy.random
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
 from sklearn.datasets import fetch_mldata
@@ -67,7 +69,7 @@ def main():
         precision = sectionsCandD(pairs, test_labels, k, n)
         precisions = np.append(precisions, precision)
     ax1.plot(training_samples, precisions)
-    plt.show()
+    plt.savefig('Q1')
 
 
 def runKnnAndReturnPrecision(train, train_labels, test, test_labels, k):

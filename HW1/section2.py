@@ -1,6 +1,8 @@
 from numpy import *
 import sys
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
@@ -77,6 +79,7 @@ def main():
     plt.axvline(intervals[1][1], -0.1, 1.05, color='r')
     plt.axhline(1.05, intervals[0][0], intervals[0][1], color='r')
     plt.axhline(1.05, intervals[1][0], intervals[1][1], color='r')
+    plt.savefig('Q2_Section_A')
 
     # section c
     k = 2
@@ -98,6 +101,7 @@ def main():
     plt.title('Section c: red - true error, blue - empirical error')
     plt.xlabel('samples number')
     plt.ylabel('error')
+    plt.savefig('Q2_Section_C')
 
     # section D
     max_k = 20
@@ -114,6 +118,7 @@ def main():
     plt.title('Section d')
     plt.xlabel('k')
     plt.ylabel('error')
+    plt.savefig('Q2_Section_D')
 
     # section e
     T = 100
@@ -134,6 +139,7 @@ def main():
     plt.title('Section e: red - true error, blue - empirical error')
     plt.xlabel('k')
     plt.ylabel('error')
+    plt.savefig('Q2_Section_E')
 
     # section f
     # choosing 10-fold cross validation (5 samples each) for determining k
@@ -168,7 +174,7 @@ def main():
     plt.plot(k_array, error_array)
     plt.xlabel('k')
     plt.ylabel('averaged error')
-    plt.show()
+    plt.savefig('Q2_Section_F')
 
 
 def generatePoints(m):
