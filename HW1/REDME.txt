@@ -1,0 +1,12 @@
+README
+
+Avi Caciularu
+Dor Bank
+
+•	section1.py file runs the first programming question, and section2.py the second.
+•	After being in the correct directory, the command to run is:
+                           python sectionX.py <output_path>
+                           and for running in the current location:
+                           python sectionX.py
+                           where X=1 for question 1 and X=2 for question 2.
+•	The output files are PNG images that include the plotted graphs requested in the sections of the questions.	

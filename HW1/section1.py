@@ -1,4 +1,5 @@
 import sys
+import os
 import numpy.random
 import numpy as np
 import matplotlib
@@ -8,7 +9,7 @@ from numpy import linalg as LA
 from sklearn.datasets import fetch_mldata
 
 
-def main():
+def main(args):
     mnist = fetch_mldata('MNIST original')
     data = mnist['data']
     labels = mnist['target']
@@ -17,6 +18,18 @@ def main():
     train_labels = labels[idx[:10000]]
     test = data[idx[10000:], :].astype(int)
     test_labels = labels[idx[10000:]]
+
+    # output path:
+    if len(args) == 1:
+        output = args[0] + '/'
+        if not os.path.exists(output):
+            print("File does not exist!")
+            sys.exit(2)
+    elif len(args) > 1:
+        print("usage: section1.py <output_path>")
+        sys.exit(2)
+    else:
+        output = ''
 
     # section B
     k = 10
@@ -66,7 +79,7 @@ def main():
         precision = sectionsCandD(pairs, test_labels, k, n)
         precisions = np.append(precisions, precision)
     ax1.plot(training_samples, precisions)
-    plt.savefig('Q1')
+    plt.savefig(output + 'Q1')
 
 
 def runKnnAndReturnPrecision(train, train_labels, test, test_labels, k):
@@ -102,4 +115,4 @@ def knn_with_pairs_ready(k, pairs):
     return np.argmax(counts)
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main(sys.argv[1:])

@@ -1,7 +1,9 @@
 from numpy import *
 import sys
+import os
 import numpy as np
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -57,7 +59,19 @@ def find_best_interval(xs, ys, k):
     return intervals, besterror
 
 
-def main():
+def main(args):
+    # output path:
+    if len(args) == 1:
+        output = args[0] + '/'
+        if not os.path.exists(output):
+            print("File does not exist!")
+            sys.exit(2)
+    elif len(args) > 1:
+        print("usage: section2.py <output_path>")
+        sys.exit(2)
+    else:
+        output = ''
+
     # section a
     points = generatePoints(100)
     plt.figure(1)
@@ -79,7 +93,8 @@ def main():
     plt.axvline(intervals[1][1], -0.1, 1.05, color='r')
     plt.axhline(1.05, intervals[0][0], intervals[0][1], color='r')
     plt.axhline(1.05, intervals[1][0], intervals[1][1], color='r')
-    plt.savefig('Q2_Section_A')
+    img_save = output + 'Q2_Section_A'
+    plt.savefig(img_save)
 
     # section c
     k = 2
@@ -101,7 +116,8 @@ def main():
     plt.title('Section c: red - true error, blue - empirical error')
     plt.xlabel('samples number')
     plt.ylabel('error')
-    plt.savefig('Q2_Section_C')
+    img_save = output + 'Q2_Section_C'
+    plt.savefig(img_save)
 
     # section D
     max_k = 20
@@ -118,7 +134,8 @@ def main():
     plt.title('Section d')
     plt.xlabel('k')
     plt.ylabel('error')
-    plt.savefig('Q2_Section_D')
+    img_save = output + 'Q2_Section_D'
+    plt.savefig(img_save)
 
     # section e
     T = 100
@@ -139,7 +156,8 @@ def main():
     plt.title('Section e: red - true error, blue - empirical error')
     plt.xlabel('k')
     plt.ylabel('error')
-    plt.savefig('Q2_Section_E')
+    img_save = output + 'Q2_Section_E'
+    plt.savefig(img_save)
 
     # section f
     # choosing 10-fold cross validation (5 samples each) for determining k
@@ -174,7 +192,8 @@ def main():
     plt.plot(k_array, error_array)
     plt.xlabel('k')
     plt.ylabel('averaged error')
-    plt.savefig('Q2_Section_F')
+    img_save = output + 'Q2_Section_F'
+    plt.savefig(img_save)
 
 
 def generatePoints(m):
@@ -252,4 +271,4 @@ def calcEmpiricalError(intervals, points):
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main(sys.argv[1:])
