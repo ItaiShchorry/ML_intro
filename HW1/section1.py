@@ -23,7 +23,7 @@ def main(args):
     if len(args) == 1:
         output = args[0] + '/'
         if not os.path.exists(output):
-            print("File does not exist!")
+            print("Path does not exist!")
             sys.exit(2)
     elif len(args) > 1:
         print("usage: section1.py <output_path>")
