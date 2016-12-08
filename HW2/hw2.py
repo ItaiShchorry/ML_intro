@@ -44,8 +44,9 @@ def perceptron(normalized_data, data_labels):
     vector_size = len(normalized_data[0])
     samples_num = len(normalized_data)
     w = np.zeros(vector_size, dtype=float)
-    w_norm = 1 # initialize norm in order to calculate without division by 0
-    for i in range (samples_num):
+    # initialize norm in order to calculate without division by 0
+    w_norm = 1
+    for i in range(samples_num):
         correct_label = data_labels[i]
         calc = np.dot(w, normalized_data[i])/w_norm
         predication = 0 if calc >= 0 else 8
