@@ -73,9 +73,9 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels):
     print (sample_num_accuracy)
     #section b
     w = perceptron(total_normalized_data, train_labels, total_samples_num, vector_size)
-    w = sklearn.preprocessing.minmax_scale(w,feature_range=(0,255))
+    w_show = sklearn.preprocessing.minmax_scale(w,feature_range=(0,255))
     plt.figure(1)
-    plt.imshow(reshape(w,(28,28)),interpolation = 'nearest', cmap = 'gray')
+    plt.imshow(reshape(w_show,(28,28)),interpolation = 'nearest', cmap = 'gray')
     plt.title('weight vector')
 
     #section c
