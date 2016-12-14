@@ -55,9 +55,9 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
     total_normalized_data = np.array([(sample/LA.norm(sample)) for sample in train_data])
     neg, pos = -1, 1
     num_of_experiments = 100
-    samples_num=[5,10,50,100,500,1000,5000,total_samples_num]#TODO
+    samples_num=[5,10,50,100,500,1000,5000,total_samples_num]
     experiment_accuracy = np.zeros(num_of_experiments, dtype=float)
-    sample_num_accuracy = np.zeros(24, dtype=float).reshape(8,3) # samples_num, mean, 5%, 95% for every row TODO
+    sample_num_accuracy = np.zeros(24, dtype=float).reshape(8,3) # mean, 5%, 95% for every row
     for i in range(8):
         for j in range(num_of_experiments):
             train_idx = numpy.random.RandomState(j).permutation(train_idx)
@@ -68,7 +68,7 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
             if i==7 and experiment_accuracy[j]>max_accuracy:
                 max_accuracy=experiment_accuracy[j]
                 w_full = w
-        print ("done ",i) #TODO
+        print ("done ",i) #TODO remove
         experiment_accuracy = np.sort(experiment_accuracy)
         #sample_num_accuracy[i][0] = numpy.round(samples_num[i])
         sample_num_accuracy[i][0] = np.mean(experiment_accuracy)
@@ -76,6 +76,7 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
         sample_num_accuracy[i][2] = experiment_accuracy[94] # 95% percentile
 
     #TODO print sample_num_accuracy in table
+    #sample_num_accurcy includes the total train samples w
     print (sample_num_accuracy)
     #section b
     #w = perceptron(total_normalized_data, train_labels, total_samples_num, vector_size)
@@ -98,11 +99,11 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
     else:
         true_digit, false_digit = 0, 8
     plt.figure(2)
-    plt.imshow(reshape(wrong_sample, (28, 28)), interpolation='nearest', cmap = 'gray')
-    plt.title('bad sample. digit is %d while prediction is %d' %(true_digit ,false_digit))
-    plt.figure(3)
     plt.imshow(reshape(test_data_unscaled[wrong_sample_idx], (28, 28)), interpolation='nearest', cmap='gray')
     plt.title('bad sample unscaled. digit is %d while prediction is %d' % (true_digit, false_digit))
+    # plt.figure(3)
+    #plt.imshow(reshape(wrong_sample, (28, 28)), interpolation='nearest', cmap='gray')
+    #plt.title('bad sample. digit is %d while prediction is %d' % (true_digit, false_digit))
     plt.show()
 
 def test_perceptron(w, sample, data_label):
