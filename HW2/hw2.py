@@ -69,22 +69,20 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
             if i==7 and experiment_accuracy[j]>max_accuracy:
                 max_accuracy=experiment_accuracy[j]
                 w_full = w
-        #print ("done ",i) #TODO remove
+
         experiment_accuracy = np.sort(experiment_accuracy)
         sample_num_accuracy[i][0] = np.mean(experiment_accuracy)
         sample_num_accuracy[i][1] = experiment_accuracy[4] # 5% percentile
         sample_num_accuracy[i][2] = experiment_accuracy[94] # 95% percentile
 
-    #TODO print sample_num_accuracy in table
     #sample_num_accurcy includes the total train samples w
     df = pd.DataFrame(sample_num_accuracy[:7], columns = ['mean', '5%', '95%'],
                       index = ['n=5','n=10','n=50','n=100','n=500','n=1000','n=5000'])
     print ("Table for programming assignment 1a:")
     print (df)
     #section b
-    w_show = sklearn.preprocessing.minmax_scale(w_full,feature_range=(0,255))
     plt.figure(1)
-    plt.imshow(reshape(w_show,(28,28)),interpolation = 'nearest', cmap = 'gray')
+    plt.imshow(reshape(w_full,(28,28)),interpolation = 'nearest', cmap = 'gray')
     plt.title('weight vector')
     img_save = output + 'Q1_weight_vector'
     plt.savefig(img_save)
@@ -92,7 +90,7 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
     #section c
     predictions_grade = np.array([test_perceptron(w_full,d,l) for (d,l) in zip(test_data, test_labels)])
     print ("fully trained perceptron accuracy meaned by 100 experiments: ", sample_num_accuracy[7][0])
-    print ("fully trained perceptron best accuracy: ", max_accuracy)
+    print ("fully trained perceptron best test accuracy: ", max_accuracy)
 
     #section d
     test_idx = np.arange(len(test_data))
