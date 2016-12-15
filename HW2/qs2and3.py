@@ -100,10 +100,10 @@ def main(args):
     img_save = output + 'Q2_weight_vector'
     plt.savefig(img_save)
     prediction_for_test = clf.predict(test_data)
-    accuracy_for_training = 1.0 * np.sum(np.array([1.0 if prediction_for_test[i] == test_labels[i] else 0.0 for i in range(test_labels.shape[0])]))/test_labels.shape[0]
+    accuracy_for_training = 1.0 * np.array([1.0 if prediction_for_test[i] == test_labels[i] else 0.0 for i in range(test_labels.shape[0])]).sum/test_labels.shape[0]
     print('The accuracy of the linear SVM with the best C on the test set is: ', accuracy_for_training)
 
-    etas = [x for x in np.arange(0.0001, 0.001, 0.0002)]
+    etas = [x for x in np.arange(12, 12.2, 0.01)]
     T = 1000
     C = 1
     best_eta0 = 0
@@ -115,29 +115,30 @@ def main(args):
             best_accuracy = accuracy
     print('The best eta0 is: ', best_eta0, 'with accuracy: ', best_accuracy)
 
+
 def accuracyCalc(eta0, C, T):
     s = 0
     for i in range(10):
         w = ourSGDSVM(train_data, train_labels, C, eta0, T)
         s = testAccuracy(w)
-    return 1.0*s/10
+    return 1.0 * s / 10
+
 
 def testAccuracy(w):
-    validation_normalized_labels = [-1.0 if validation_labels[i] == neg else 1.0 for i in range(len(validation_labels))]
     prediction_for_validation = [np.dot(w, validation_data[i]) for i in range(len(validation_labels))]
     accuracy_for_validation = 1.0 * np.sum(np.array(
-        [1.0 if prediction_for_validation[i]*validation_normalized_labels[i]>0 else 0.0 for i in
-         range(len(validation_normalized_labels))]))/len(validation_normalized_labels)
+        [0.0 if np.multiply(prediction_for_validation[i], validation_labels[i]) < 1 else 1.0 for i in
+         range(len(validation_labels))])) / len(validation_labels)
     return accuracy_for_validation
-
 
 def ourSGDSVM(samples, labels, C, eta0, T):
     w = np.zeros(len(samples[0]), dtype=float)
-    for t in range(1, T+1):
+    for t in range(1, T + 1):
         i = np.random.randint(0, len(samples))
-        eta_t = eta0/t
-        if np.multiply(labels[i], np.dot(w, samples[i])) < 1:
-            w = np.multiply((1 - eta_t), w) + np.multiply(eta_t*C*labels[i], samples[i])
+        prediction_result = False if np.multiply(labels[i], np.dot(w, samples[i])) < 1 else True
+        eta_t = eta0 / t
+        if not prediction_result:
+            w = np.multiply((1 - eta_t), w) + np.multiply(eta_t * C * labels[i], samples[i])
     return w
 
 if __name__ == '__main__':
