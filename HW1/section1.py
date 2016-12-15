@@ -42,6 +42,7 @@ def main(args):
                                 for i in range(5000)]) for j in range(test.shape[0])])
 
     # Plotting configurations for sections C and D.
+    plt.figure(1)
     ax0 = plt.subplot(211)
     ax0.set_xlabel('k')
     ax0.set_ylabel('precision')
