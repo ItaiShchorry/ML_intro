@@ -73,7 +73,7 @@ def main(args):
     plt.title('Different $\eta_{0}$ values vs. their accuracy')
     plt.figure(2)
     img_save = output + 'Q3_Section_A'
-    plt.savefig(img_save)
+    #plt.savefig(img_save)
 
     # Section B
     best_eta0 = 20
@@ -96,7 +96,7 @@ def main(args):
     plt.ylabel('Accuracy')
     plt.title('Different C values vs. their accuracy')
     img_save = output + 'Q3_Section_B'
-    plt.savefig(img_save)
+    #plt.savefig(img_save)
 
     # Section C
     best_eta0 = 20.0
@@ -107,12 +107,13 @@ def main(args):
     plt.imshow(reshape(w, (28, 28)), interpolation='nearest', cmap='gray')
     plt.title('weight vector')
     img_save = output + 'Q3_Section_C_weight_vector'
-    plt.savefig(img_save)
+    #plt.savefig(img_save)
 
     # Section D
     best_accuracy = accuracyCalc(best_eta0, best_C, T, test_data, test_labels)
     print('The best accuracy on test set is: ', best_accuracy)
 
+    plt.show()
 
 def accuracyCalc(eta0, C, T, set, labels):
     s = 0.0
