@@ -1,4 +1,5 @@
 import sys
+import os
 from numpy import *
 import numpy as np
 import numpy.random
@@ -6,6 +7,8 @@ from sklearn.datasets import fetch_mldata
 import sklearn.preprocessing
 from numpy import linalg as LA
 import matplotlib
+
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import svm

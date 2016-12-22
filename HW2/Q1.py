@@ -1,4 +1,5 @@
 import sys
+import os
 from numpy import *
 import numpy as np
 import numpy.random
@@ -6,6 +7,7 @@ from sklearn.datasets import fetch_mldata
 import sklearn.preprocessing
 from numpy import linalg as LA
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -31,7 +33,6 @@ test_labels = (labels[60000 + test_idx] == pos) * 2 - 1
 train_data = sklearn.preprocessing.scale(train_data_unscaled, axis=0, with_std=False)
 validation_data = sklearn.preprocessing.scale(validation_data_unscaled, axis=0, with_std=False)
 test_data = sklearn.preprocessing.scale(test_data_unscaled, axis=0, with_std=False)
-
 
 def main(args):
     # output path:
@@ -84,8 +85,8 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
     print(df)
     # section b
     plt.figure(1)
-    plt.imshow(reshape(w_full, (28, 28)), interpolation='nearest', cmap='gray')
     plt.title('weight vector')
+    plt.imshow(reshape(w_full, (28, 28)), cmap='gray', interpolation='nearest')
     img_save = output + 'Q1_weight_vector'
     plt.savefig(img_save)
 
@@ -105,10 +106,8 @@ def perceptron_experiments(train_data, train_labels, test_data, test_labels, tes
     plt.figure(2)
     plt.imshow(reshape(test_data_unscaled[wrong_sample_idx], (28, 28)), interpolation='nearest', cmap='gray')
     plt.title('misclassified sample unscaled. digit is %d while prediction is %d' % (true_digit, false_digit))
-    img_save = output + 'Q1_misclassified sample unscaled'
+    img_save = output + 'Q1_misclassified_sample_unscaled'
     plt.savefig(img_save)
-    # plt.show()
-
 
 def test_perceptron(w, sample, data_label):
     prediction = 1 if np.dot(w, sample) >= 0 else -1

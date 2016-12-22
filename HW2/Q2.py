@@ -1,4 +1,5 @@
 import sys
+import os
 from numpy import *
 import numpy as np
 import numpy.random
@@ -6,6 +7,8 @@ from sklearn.datasets import fetch_mldata
 import sklearn.preprocessing
 from numpy import linalg as LA
 import matplotlib
+
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import svm
@@ -92,11 +95,10 @@ def main(args):
     plt.xlabel('C value')
     plt.ylabel('Accuracy')
     plt.title('Different C values vs. their accuracy')
+    line_up, = plt.plot(C_list, validation_set_accuracies, 'g', label='Accuracy for validation set')
+    line_down, = plt.plot(C_list, training_set_accuracies, 'r', label='Accuracy for training set')
+    plt.legend([line_up, line_down])
     plt.xscale('log')
-    green_patch = mpatches.Patch(color='green', label='Accuracy for validation set')
-    red_patch = mpatches.Patch(color='red', label='Accuracy for training set')
-    plt.plot(C_list, validation_set_accuracies, 'g', C_list, training_set_accuracies, 'r')
-    plt.legend(handles=[green_patch, red_patch])
     img_save = output + 'Q2_Section_A'
     plt.savefig(img_save)
 
@@ -111,7 +113,7 @@ def main(args):
     prediction_for_test = clf.predict(test_data)
 
     # Section D
-    accuracy_for_training = 1.0 * np.array(\
+    accuracy_for_training = 1.0 * np.array( \
         [1.0 if prediction_for_test[i] == test_labels[i] else 0.0 for i in range(test_labels.shape[0])]).sum() / \
                             test_labels.shape[0]
     print('The accuracy of the linear SVM with the best C on the test set is: ', accuracy_for_training)
