@@ -67,16 +67,13 @@ def main(args):
     print('The best eta_0 is: ', best_eta0, 'with accuracy: ', best_accuracy)
     plt.figure(1)
     plt.plot(etas, acs)
-    plt.xscale('log')
     plt.xlabel('$\eta_{0}$ value')
     plt.ylabel('Accuracy')
     plt.title('Different $\eta_{0}$ values vs. their accuracy')
-    plt.figure(2)
     img_save = output + 'Q3_Section_A'
     #plt.savefig(img_save)
 
     # Section B
-    best_eta0 = 20
     C_list = [math.pow(math.sqrt(10), x) for x in range(-20, 22)]
     T = 1000
     best_C = 0

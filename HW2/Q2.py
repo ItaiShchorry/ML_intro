@@ -97,8 +97,7 @@ def main(args):
     plt.title('Different C values vs. their accuracy')
     line_up, = plt.plot(C_list, validation_set_accuracies, 'g', label='Accuracy for validation set')
     line_down, = plt.plot(C_list, training_set_accuracies, 'r', label='Accuracy for training set')
-    plt.legend([line_up, line_down])
-    plt.xscale('log')
+    plt.legend()
     img_save = output + 'Q2_Section_A'
     plt.savefig(img_save)
 
