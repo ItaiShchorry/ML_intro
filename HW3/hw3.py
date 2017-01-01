@@ -1,11 +1,18 @@
 import sys
 import os
 from numpy import *
+import numpy as np
 import numpy.random
 from sklearn.datasets import fetch_mldata
 import sklearn.preprocessing
+from numpy import linalg as LA
 import matplotlib
 
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn import svm
+import matplotlib.patches as mpatches
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -29,6 +36,7 @@ test_labels = labels[60000:]
 train_data = sklearn.preprocessing.scale(train_data_unscaled, axis=0, with_std=False)
 validation_data = sklearn.preprocessing.scale(validation_data_unscaled, axis=0, with_std=False)
 test_data = sklearn.preprocessing.scale(test_data_unscaled, axis=0, with_std=False)
+K = [i for i in range(10)]
 
 def main(args):
     # output path:
@@ -42,6 +50,51 @@ def main(args):
         sys.exit(2)
     else:
         output = ''
+
+def accuracyCalc(eta, C, T, set, labels):
+    s = 0.0
+    for i in range(10):
+        w = ourNonKernelSGDSVM(train_data, train_labels, C, eta, T)
+        s += testAccuracy(w, set, labels)
+    return 1.0 * s / 10
+
+
+def testAccuracy(w, set, labels):
+    prediction = [np.dot(w, set[i]) for i in range(len(labels))]
+    accuracy_for_validation = 1.0 * np.array(
+        [0.0 if np.multiply(labels[i], prediction[i]) < 0 else 1.0 for i in
+         range(len(labels))]).sum() / len(labels)
+    return accuracy_for_validation
+
+
+def ourNonKernelSGDSVM(samples, labels, C, eta, T):
+    weights = [np.zeros(len(samples[0]), dtype='float64')] * 10
+    for t in range(1, T + 1):
+        i = np.random.randint(0, len(samples))
+        indicator_vec = [1 if j != labels[i] else 0 for j in K]
+        penalty_vec = [np.dot(samples[i], weights[j])\
+                       - np.dot(samples[i], weights[labels[i]]) + indicator_vec[j] for j in K]
+        max_j = np.max(penalty_vec)
+        for j in K:
+            if j == max_j:
+                weights[j] -= eta * C * samples[i]
+            if j == labels[i]:
+                weights[j] += eta * C * samples[i]
+            else:
+                weights[j] = (1-eta) * weights[j]
+    return weights
+
+def ourKernelSGDSVM(samples, labels, eta, C, T):
+    weights = [np.zeros(len(samples[0]), dtype='float64')] * 10
+    for t in range(1, T + 1):
+        i = np.random.randint(0, len(samples))
+        indicator_vec = [1 if j != labels[i] else 0 for j in K]
+        penalty_vec = [np.dot(samples[i], weights[j])\
+                       - np.dot(samples[i], weights[labels[i]]) + indicator_vec[j] for j in K]
+        max_j = np.max(penalty_vec)
+        weights[max_j] -= eta * C * samples[i]
+        weights[labels[i]] += eta * C * samples[i]
+    return weights
 
 if __name__ == '__main__':
     main(sys.argv[1:])
