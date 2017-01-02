@@ -52,7 +52,7 @@ def main(args):
         output = ''
         # Section A
 
-    etas = [x for x in frange(0.000001, 0.00001, 0.000001)]
+    etas = [x for x in range(1, 100)]
     T = 1000
     C = 1.0
     best_eta = 0
@@ -64,15 +64,16 @@ def main(args):
         if accuracy > best_accuracy:
             best_eta = eta
             best_accuracy = accuracy
-    print('The best eta is: ', best_eta, 'with accuracy: ', best_accuracy)
+    print('The best eta_0 is: ', best_eta, 'with accuracy: ', best_accuracy)
     plt.figure(1)
     plt.plot(etas, acs)
-    plt.xlabel('$\eta$ value')
+    plt.xlabel('$\eta_{0}$ value')
     plt.ylabel('Accuracy')
-    plt.title('Different $\eta$ values vs. their accuracy')
-    img_save = output + 'Q3_Section_A_eta'
+    plt.title('Different $\eta_{0}$ values vs. their accuracy')
+    img_save = output + 'Q3_Section_A'
     plt.savefig(img_save)
 
+    # Section B
     C_list = [math.pow(math.sqrt(10), x) for x in range(-20, 22)]
     T = 1000
     best_C = 0
@@ -91,23 +92,8 @@ def main(args):
     plt.xlabel('C value')
     plt.ylabel('Accuracy')
     plt.title('Different C values vs. their accuracy')
-    img_save = output + 'Q3_Section_A_C'
+    img_save = output + 'Q3_Section_B'
     plt.savefig(img_save)
-
-    T = 10000
-    weights = ourNonKernelSGDSVM(train_data, train_labels, best_C, best_eta, T)
-    for j in K:
-        w = weights[j]
-        plt.figure(3+j)
-        plt.imshow(reshape(w, (28, 28)), interpolation='nearest', cmap='gray')
-        name = 'weight vector for digit ' + str(j)
-        plt.title(name)
-        img_save = output + 'Q3_Section_C_weight_vector_for_digit_' + str(j)
-        plt.savefig(img_save)
-
-    # Section C
-    best_accuracy = accuracyCalc(best_eta, best_C, T, test_data, test_labels)
-    print('The best accuracy on test set is: ', best_accuracy)
 
 
 def accuracyCalc(eta, C, T, set, labels):
