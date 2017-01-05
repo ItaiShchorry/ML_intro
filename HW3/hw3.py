@@ -52,8 +52,9 @@ def main(args):
         output = ''
         # Section A
 
-    etas = [x for x in frange(0.000001, 0.00001, 0.000001)]
-    T = 1000
+    etas = [1e-20,1e-19,1e-18,1e-17,1e-16,1e-15\
+        ,1e-14,1e-13,1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e-0]
+    T = 5000
     C = 1.0
     best_eta = 0
     best_accuracy = 0
@@ -68,13 +69,13 @@ def main(args):
     plt.figure(1)
     plt.plot(etas, acs)
     plt.xlabel('$\eta$ value')
+    plt.xscale('log')
     plt.ylabel('Accuracy')
     plt.title('Different $\eta$ values vs. their accuracy')
     img_save = output + 'Q3_Section_A_eta'
     plt.savefig(img_save)
 
-    C_list = [math.pow(math.sqrt(10), x) for x in range(-20, 22)]
-    T = 1000
+    C_list = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10]
     best_C = 0
     best_accuracy = 0
     acs = []
@@ -94,7 +95,6 @@ def main(args):
     img_save = output + 'Q3_Section_A_C'
     plt.savefig(img_save)
 
-    T = 10000
     weights = ourNonKernelSGDSVM(train_data, train_labels, best_C, best_eta, T)
     for j in K:
         w = weights[j]
@@ -121,10 +121,7 @@ def accuracyCalc(eta, C, T, set, labels):
 def testAccuracy(weights, set, labels):
     accuracy_for_validation = 0
     for i in range(set.shape[0]):
-        indicator_vec = [1 if j != labels[i] else 0 for j in K]
-        penalty_vec = [np.dot(set[i], weights[j]) \
-                   - np.dot(set[i], weights[int(labels[i])]) + indicator_vec[j] for j in K]
-        prediction = np.argmax(penalty_vec)
+        prediction = np.argmax(np.array([np.dot(set[i], weights[j]) for j in range(10)]), axis=0)
         if prediction == labels[i]:
             accuracy_for_validation += 1.0
 
@@ -144,6 +141,7 @@ def ourNonKernelSGDSVM(samples, labels, C, eta, T):
         if max_j != labels[i]:
             weights[max_j] -= eta * C * samples[i]
             weights[int(labels[i])] += eta * C * samples[i]
+
     return weights
 
 def ourKernelSGDSVM(samples, labels, eta, C, T):
