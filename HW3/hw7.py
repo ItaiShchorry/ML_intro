@@ -54,7 +54,7 @@ def main(args):
 
     etas = [1e-20,1e-19,1e-18,1e-17,1e-16,1e-15\
         ,1e-14,1e-13,1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e-0]
-    T = 5000
+    T = 600
     C = 1.0
     best_eta = 0
     best_accuracy = 0
@@ -104,15 +104,15 @@ def main(args):
 def accuracyCalc(eta, C, T, set, labels, kernel):
     s = 0.0
     for i in range(10):
-        alphas = ourKernelSGDSVM(train_data, train_labels, C, eta, T, kernel)
-        s += testAccuracy(alphas, set, labels, kernel)
+        alphas, rand_inds = ourKernelSGDSVM(train_data, train_labels, C, eta, T, kernel)
+        s += testAccuracy(alphas, rand_inds, set, labels, kernel)
     return 1.0 * s / 10
 
 
-def testAccuracy(alphas, set, labels, kernel):
+def testAccuracy(alphas,rand_inds, set, labels, kernel):
     accuracy_for_validation = 0
     for i in range(set.shape[0]):
-        prediction = predict(alphas, kernel, set[i])
+        prediction = predict(alphas,rand_inds, kernel, set[i])
         if prediction == labels[i]:
             accuracy_for_validation += 1.0
 
@@ -120,20 +120,26 @@ def testAccuracy(alphas, set, labels, kernel):
 
 
 def ourKernelSGDSVM(samples, labels, eta, C, T, kernel):
-    alphas = np.zeros((samples.shape[0], 10), dtype='float64')
-    for t in range(1, T + 1):
+    alphas = np.zeros((T, 10), dtype='float64')
+    rand_inds = []
+    for t in range(T):
         i = np.random.randint(0, len(samples))
+        rand_inds.append(i)
         xi = samples[i]
         yi = int(labels[i])
         indicator_vec = [int(j != yi) for j in K]
-        k = np.array([kernel(samples[n], xi) for n in range(samples.shape[0])])
-        penalty_vec = [np.dot(k,np.subtract(alphas[:,j], alphas[:,yi])) + indicator_vec[j] for j in K]
-        max_j = np.argmax(penalty_vec)
-        alphas[:,:] = np.multiply(alphas[:,:], (1 - eta))
+        if t!=0:
+            k = np.array([kernel(samples[rand_inds[n]], xi) for n in range(t)])
+            penalty_vec = [np.dot(k,np.subtract(alphas[:t,j], alphas[:t,yi])) + indicator_vec[j] for j in K]
+            max_j = np.argmax(penalty_vec)
+        else:
+            max_j = 0
+        alphas[:, :] = np.multiply(alphas[:, :], (1 - eta))
         if max_j != yi:
-            alphas[i, max_j] = np.subtract(alphas[i, max_j], eta*C)
-            alphas[i, yi] = np.subtract(alphas[i, yi], -eta*C)
-    return alphas
+            alphas[:t, max_j] = alphas[t, max_j] - eta*C
+            alphas[:t, yi] = alphas[t, max_j] + eta*C
+
+    return alphas, rand_inds
 
 def frange(start, stop, step):
     i = start
@@ -141,8 +147,8 @@ def frange(start, stop, step):
         yield i
         i += step
 
-def predict(alphas, kernel, sample):
-    k = np.array([kernel(train_data[n], sample) for n in range(train_data.shape[0])])
+def predict(alphas,rand_inds, kernel, sample):
+    k = np.array([kernel(train_data[rand_inds[n]], sample) for n in range(len(rand_inds))])
     predictions = np.array([np.dot(alphas[:,j],k) for j in K])
     return np.argmax(predictions)
 

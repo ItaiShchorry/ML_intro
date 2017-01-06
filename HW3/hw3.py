@@ -65,6 +65,7 @@ def main(args):
         if accuracy > best_accuracy:
             best_eta = eta
             best_accuracy = accuracy
+        print('Done for eta=', eta, 'accuracy=', accuracy)
     print('The best eta is: ', best_eta, 'with accuracy: ', best_accuracy)
     plt.figure(1)
     plt.plot(etas, acs)
@@ -85,6 +86,7 @@ def main(args):
         if accuracy > best_accuracy:
             best_C = C
             best_accuracy = accuracy
+        print('Done for C=', C, 'accuracy=', accuracy)
     print('The best C is: ', best_C, 'with accuracy: ', best_accuracy)
     plt.figure(2)
     plt.plot(C_list, acs)
