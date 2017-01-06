@@ -60,11 +60,12 @@ def main(args):
     best_accuracy = 0
     acs = []
     for eta in etas:
-        accuracy = accuracyCalc(1.0 * eta, C, T, validation_data, validation_labels)
+        accuracy = accuracyCalc(1.0 * eta, C, T, validation_data, validation_labels, quadratic)
         acs.append(accuracy)
         if accuracy > best_accuracy:
             best_eta = eta
             best_accuracy = accuracy
+        print('done for eta=',eta, 'accuracy=', accuracy)
     print('The best eta is: ', best_eta, 'with accuracy: ', best_accuracy)
     plt.figure(1)
     plt.plot(etas, acs)
@@ -80,7 +81,7 @@ def main(args):
     best_accuracy = 0
     acs = []
     for C in C_list:
-        accuracy = accuracyCalc(best_eta, C, T, validation_data, validation_labels)
+        accuracy = accuracyCalc(best_eta, C, T, validation_data, validation_labels, quadratic)
         acs.append(accuracy)
         if accuracy > best_accuracy:
             best_C = C
@@ -95,56 +96,44 @@ def main(args):
     img_save = output + 'Q3_Section_A_C'
     plt.savefig(img_save)
 
-    weights = ourNonKernelSGDSVM(train_data, train_labels, best_C, best_eta, T)
-    for j in K:
-        w = weights[j]
-        plt.figure(3+j)
-        plt.imshow(reshape(w, (28, 28)), interpolation='nearest', cmap='gray')
-        name = 'weight vector for digit ' + str(j)
-        plt.title(name)
-        img_save = output + 'Q3_Section_C_weight_vector_for_digit_' + str(j)
-        plt.savefig(img_save)
-
     # Section C
-    best_accuracy = accuracyCalc(best_eta, best_C, T, test_data, test_labels)
+    best_accuracy = accuracyCalc(best_eta, best_C, T, test_data, test_labels, quadratic)
     print('The best accuracy on test set is: ', best_accuracy)
 
 
-def accuracyCalc(eta, C, T, set, labels):
+def accuracyCalc(eta, C, T, set, labels, kernel):
     s = 0.0
     for i in range(10):
-        weights = ourNonKernelSGDSVM(train_data, train_labels, C, eta, T)
-        s += testAccuracy(weights, set, labels)
+        alphas = ourKernelSGDSVM(train_data, train_labels, C, eta, T, kernel)
+        s += testAccuracy(alphas, set, labels, kernel)
     return 1.0 * s / 10
 
 
-def testAccuracy(weights, set, labels):
+def testAccuracy(alphas, set, labels, kernel):
     accuracy_for_validation = 0
     for i in range(set.shape[0]):
-        prediction = np.argmax(np.array([np.dot(set[i], weights[j]) for j in range(10)]), axis=0)
+        prediction = predict(alphas, kernel, set[i])
         if prediction == labels[i]:
             accuracy_for_validation += 1.0
 
     return accuracy_for_validation/len(labels)
 
 
-def ourNonKernelSGDSVM(samples, labels, C, eta, T):
-    weights = [np.zeros(len(samples[0]), dtype='float64')] * 10
+def ourKernelSGDSVM(samples, labels, eta, C, T, kernel):
+    alphas = np.zeros((samples.shape[0], 10), dtype='float64')
     for t in range(1, T + 1):
-        i = np.random.randint(0, len(labels))
-        yi = int(labels[i])
+        i = np.random.randint(0, len(samples))
         xi = samples[i]
+        yi = int(labels[i])
         indicator_vec = [int(j != yi) for j in K]
-        penalty_vec = [np.dot(xi, weights[j])
-                       - np.dot(xi, weights[yi]) + indicator_vec[j] for j in K]
+        k = np.array([kernel(samples[n], xi) for n in range(samples.shape[0])])
+        penalty_vec = [np.dot(k,np.subtract(alphas[:,j], alphas[:,yi])) + indicator_vec[j] for j in K]
         max_j = np.argmax(penalty_vec)
-        for j in K:
-            weights[j] = (1 - eta) * weights[j]
-        if max_j != labels[i]:
-            weights[max_j] -= eta * C * xi
-            weights[yi] += eta * C * xi
-
-    return weights
+        alphas[:,:] = np.multiply(alphas[:,:], (1 - eta))
+        if max_j != yi:
+            alphas[i, max_j] = np.subtract(alphas[i, max_j], eta*C)
+            alphas[i, yi] = np.subtract(alphas[i, yi], -eta*C)
+    return alphas
 
 def frange(start, stop, step):
     i = start
@@ -152,6 +141,16 @@ def frange(start, stop, step):
         yield i
         i += step
 
+def predict(alphas, kernel, sample):
+    k = np.array([kernel(train_data[n], sample) for n in range(train_data.shape[0])])
+    predictions = np.array([np.dot(alphas[:,j],k) for j in K])
+    return np.argmax(predictions)
+
+def lin(x,y):
+    return np.dot(x,y)
+
+def quadratic(x,y):
+    return np.square(np.dot(x, y) + 1)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
