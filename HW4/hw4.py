@@ -39,7 +39,8 @@ def main(args):
         sys.exit(2)
     else:
         output = ''
-# Section A
+
+    # Section A
 
 
 if __name__ == '__main__':
