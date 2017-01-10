@@ -53,28 +53,14 @@ def main(args):
 
     # Section A
     ttrain_data = np.array(train_data)
-    #max_pixel = np.max(ttrain_data)
-    #min_pixel = np.min(ttrain_data)
-    #thresholds = [i for i in range(min_pixel.astype(int), max_pixel.astype(int))]
-    ###thresholds = [i for i in range(-12,12,4)]
-    thresholds = [-128, -5, 0, 5, 128]
+    thresholds = [i for i in range(-12,12,4)] # seemed ok with consideration of pixel values, 0 and 8 features, and running time
+    #thresholds = [-128, -5, 0, 5, 128]
     pixels = [j for j in range(200,(p-200))]
-    #pixels = (j for j in range(p))
-    #h_pos_array = np.array([(lambda x: sign(x[j]-thresholds[i])) for i in thresholds for j in pixels])
-    #h_neg_array = np.array([(lambda x: -sign(x[j]-thresholds[i])) for i in thresholds for j in pixels])
-    #h_array = np.concatenate((h_pos_array,h_neg_array))
-    h_array = []
-    for i in thresholds:
-        for j in pixels:
-            h_array.append(lambda x: 1. if x[j] <= i else -1.)
-            h_array.append(lambda x: -1. if x[j] <= i else 1.)
+    options = [0,1] # which sign to give according to the threshold
+    h_array = [(i,j,k) for i in thresholds for j in pixels for k in options]
     h_array = np.array(h_array)
     print ("num of h: ",h_array.shape)
     D = np.array([(1. / m) for i in range(m)])
-    for k in range (0,100,5):
-        for l in range (0, 3000, 500):
-            print ("h ", l ," result ", h_array[l](train_data[k]))
-    return
     print (D[1:5])
     T=50
     H = []
@@ -92,7 +78,7 @@ def main(args):
         test_error.append(test_H(H,alphas,t,False))
         train_lossFunc.append(calcLossFunc(H, alphas, t, True))
         test_lossFunc.append(calcLossFunc(H, alphas, t, False))
-        print ("iteration ", t+1 ," train error ",train_error[t]," test error ",test_error[t])
+        print ("iteration ", t + 1 ," train error ",train_error[t]," test error ",test_error[t])
         print ("iteration ", t + 1, " train lossFunc ", train_lossFunc[t], " test lossFunc ", test_lossFunc[t])
 
     print ("train error ",train_error)
@@ -134,56 +120,73 @@ def main(args):
     img_save = output + 'test loss function'
     plt.savefig(img_save)
 
-# each hypothesys will be represented by [threshold, sign (for above it), j (pixel)]
-# we will use each pixel values as threshold
+
 def set_params(D,h_array):
     best_h = h_array[0]
     best_error = 1.
     for h in h_array:
         curr_error = test_h(h,D)
         if curr_error<best_error:
-            print ("new best error ", curr_error)
+            #print ("new best error ", curr_error)
             best_error = curr_error
             best_h = h
     print ("############")
-    print ("best error", best_error)
-    print ("(1. -best_error)/best_error", (1. -best_error)/best_error)
-    print ("math.log((1. -best_error)/best_error) 1 = ", math.log((1. -best_error)/best_error))
     b = (1. -best_error)/best_error
-    print ("b", b)
-    print ("math.log((1. -best_error)/best_error) 2 = ", math.log(b))
     alpha = 0.5 * math.log((1. -best_error)/best_error)
-    D = np.array([D[i]*math.exp(-alpha) if train_labels[i] == best_h(train_data[i])
+    D = np.array([D[i]*math.exp(-alpha) if train_labels[i] == hypothesys(train_data[i],best_h)
                   else D[i]*math.exp(alpha) for i in range (m)])
-    D = [d / D.sum() for d in D]
-    print ("best error", best_error," alpha ", alpha," D[1:20]", D[1:10])
+    D = np.array([d / D.sum() for d in D])
+    print ("best error", best_error," alpha ", alpha," D[1:10]", D[1:10])
     return (best_h,best_error,alpha,D)
 
 
 def test_h(h,D):
-    return (np.dot(np.array([h(train_data[i]) != train_labels[i] for i in range (m)]),np.array(D)))
+    return (np.dot(np.array([hypothesys(train_data[i],h) != train_labels[i] for i in range (m)]),D))
 
 #returns the error
 def test_H(H,alphas,T,is_train):
     data = train_data if is_train else test_data
     labels = train_labels if is_train else test_labels
     len = train_data.shape[0] if is_train else test_data.shape[0]
-    y_hat = [sign(np.array(alphas[t]*H[t](data[i]) for t in range(T)).sum()) for i in range (len)]
+    # the probability of predicting 0 is 0 so we can use the sign function
+    y_hat = np.array([])
+    for i in range(len):
+        coef = 0
+        for t in range (T+1):
+            coef+=alphas[t]*hypothesys(data[i],H[t])
+        y_hat = np.append(y_hat,sign(coef))
+        #y_hat = np.append(y_hat, sign( np.array(alphas[t]*hypothesys(data[i],H[t]) for t in range(T+1)).sum() ) )
     return (np.array([y_hat[i] != labels[i] for i in range(len)]).mean())
 
 def calcLossFunc(H,alphas,T,is_train):
     data = train_data if is_train else test_data
     labels = train_labels if is_train else test_labels
     len = train_data.shape[0] if is_train else test_data.shape[0]
-    coef = 0
     losses = []
     for i in range (len):
-        for t in range (T):
-            coef += alphas[t] * H[t](data[i])
-        #coef = coef*labels[i]*(-1.)
-        #coef = math.exp(-labels[i]*coef)
+        coef = 0
+        for t in range (T+1):
+            coef += alphas[t] * hypothesys(data[i],H[t])
         losses.append(math.exp(-labels[i]*coef))
     return np.array(losses).mean()
+
+def hypothesys(x, (i, j, k)):
+    if k == 0:
+         return pos_under(x, (i, j))
+    else:
+         return pos_over(x, (i, j))
+
+def pos_under(x, (i, j)):
+    if x[j] <= i:
+        return (1.)
+    else:
+        return (-1.)
+
+def pos_over(x, (i, j)):
+    if x[j] <= i:
+        return (-1.)
+    else:
+        return (1.)
     #return ( np.array([math.exp(-labels[i]*np.array((alphas[t] * H[t](data[i])) for t in range(T)).sum()) for i in range(len)]).mean() )
 
 if __name__ == '__main__':
