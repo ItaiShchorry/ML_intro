@@ -48,7 +48,7 @@ def main(args):
             print("Path does not exist!")
             sys.exit(2)
     elif len(args) > 1:
-        print("usage: Q5.py <output_path>")
+        print("usage: Q5_not_relevant.py <output_path>")
         sys.exit(2)
     else:
         output = ''
@@ -92,8 +92,10 @@ def main(args):
     X_hat_10 = np.matmul(np.matmul(eigan_vectors[:10].T, eigan_vectors[:10]), images.T).T
     X_hat_30 = np.matmul(np.matmul(eigan_vectors[:30].T, eigan_vectors[:30]), images.T).T
     X_hat_50 = np.matmul(np.matmul(eigan_vectors[:50].T, eigan_vectors[:50]), images.T).T
-    for i in range (4):
-        output_plots_E([images[i],X_hat_10[i],X_hat_30[i],X_hat_50[i]],i,output)
+    #for i in range (4):
+    #    output_plots_E([images[i],X_hat_10[i],X_hat_30[i],X_hat_50[i]],i,output)
+
+    output_plots_E([images, X_hat_10, X_hat_30, X_hat_50], output)
 
 def PCA(data, dims_rescaled_data=2):
     data -= data.mean(axis=0)
@@ -116,7 +118,7 @@ def output_plots_A_B_C(eigan_values, mean_vector, eigan_vectors, output, section
         head = '0'
     elif (section == 'c'):
         fig_num = 5
-        head = 'both_0_&_8'
+        head = '0_&_8'
 
     # plotting vectors
     plt.figure(fig_num)
@@ -140,24 +142,31 @@ def output_plots_A_B_C(eigan_values, mean_vector, eigan_vectors, output, section
     img_save = output + "Q6_section_" + section + "_" + head + "_eigan_values"
     plt.savefig(img_save)
 
-def output_plots_E(image_constructions,image_index,output):
+def output_plots_E(image_constructions,output):
 
-    if (image_index == 0):
-        head = "pos image 1"
-    elif (image_index == 1):
-        head = "pos image 2"
-    elif (image_index == 2):
-        head = "neg image 1"
-    elif (image_index == 3):
-        head = "neg image 2"
+    plt.figure(8)
+    title_array = ["original", "k=10", "k=30", "k=50"]
+    image_headers = ["pos image 1","pos image 2","neg image 1","neg image 2"]
+    for image_index in range(4):
 
-    title_array = [head, "k=10", "k=30", "k=50"]
-    plt.figure(8 + image_index)
-    for i in range (4):
-        plt.subplot(141+i)
-        plt.title(title_array[i])
-        plt.imshow(reshape(image_constructions[i], (28, 28)), cmap='gray', interpolation='nearest')
-    img_save = output + "Q6_section_e_" + head + "_constructions"
+        # if (image_index == 0):
+        #     head = "pos image 1"
+        # elif (image_index == 1):
+        #     head = "pos image 2"
+        # elif (image_index == 2):
+        #     head = "neg image 1"
+        # elif (image_index == 3):
+        #     head = "neg image 2"
+
+    #plt.figure(8 + image_index)
+        for i in range (4):
+            plt.subplot2grid((4,4),(image_index,i))
+            if (image_index == 0):
+                plt.title(title_array[i])
+            if (i == 0):
+                plt.ylabel(image_headers[image_index])
+            plt.imshow(reshape(image_constructions[i][image_index], (28, 28)), cmap='gray', interpolation='nearest')
+    img_save = output + "Q6_section_e_constructions"
     plt.savefig(img_save)
 
 

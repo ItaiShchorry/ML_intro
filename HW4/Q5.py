@@ -34,11 +34,19 @@ train_data = sklearn.preprocessing.scale(train_data_unscaled, axis=0, with_std=F
 #validation_data = sklearn.preprocessing.scale(validation_data_unscaled, axis=0, with_std=False)
 test_data = sklearn.preprocessing.scale(test_data_unscaled, axis=0, with_std=False)
 
-m = train_data.shape[0]
-p = train_data.shape[1]
+samples_num = train_data.shape[0]
+pixels_num = train_data.shape[1]
+sorted_pixels = [[1. for i in range(samples_num)] for j in range(pixels_num)]
+sorted_pixel_labels = [[1. for i in range(samples_num)] for j in range(pixels_num)]
+idx = [[1. for i in range(samples_num)] for j in range(pixels_num)]
+# Dist = np.array([(1. / samples_num) for i in range(samples_num)])
+#preprocessing phase for weak learners
+for pixel in range(pixels_num):
+    idx[pixel] = np.argsort([train_data[sample_index][pixel] for sample_index in range(samples_num)])
+    sorted_pixels[pixel] = [train_data[j][pixel] for j in idx[pixel]]
+    sorted_pixel_labels[pixel] = [train_labels[j] for j in idx[pixel]]
 
 def main(args):
-    D = np.array([(1/m) for i in range(m)])
     # output path:
     if len(args) == 1:
         output = args[0] + '/'
@@ -52,15 +60,10 @@ def main(args):
         output = ''
 
     # Section A
-    ttrain_data = np.array(train_data)
-    thresholds = [i for i in range(-12,12,4)] # seemed ok with consideration of pixel values, 0 and 8 features, and running time
-    #thresholds = [-128, -5, 0, 5, 128]
-    pixels = [j for j in range(200,(p-200))]
-    options = [0,1] # which sign to give according to the threshold
-    h_array = [(i,j,k) for i in thresholds for j in pixels for k in options]
-    h_array = np.array(h_array)
-    print ("num of h: ",h_array.shape)
-    D = np.array([(1. / m) for i in range(m)])
+    print (np.array(idx).shape)
+    print (np.array(sorted_pixels).shape)
+    print (np.array(sorted_pixel_labels).shape)
+    D = np.array([(1. / samples_num) for i in range(samples_num)])
     print (D[1:5])
     T=50
     H = []
@@ -71,7 +74,7 @@ def main(args):
     test_lossFunc = []
     t_array = [i for i in range (1,T+1)]
     for t in range (T):
-        (h,train_error_i,alpha,D) = set_params(D,h_array)
+        (h,train_error_i,alpha,D) = set_params(D)
         H.append(h)
         alphas.append(alpha)
         train_error.append(test_H(H,alphas,t,True))
@@ -80,11 +83,6 @@ def main(args):
         test_lossFunc.append(calcLossFunc(H, alphas, t, False))
         print ("iteration ", t + 1 ," train error ",train_error[t]," test error ",test_error[t])
         print ("iteration ", t + 1, " train lossFunc ", train_lossFunc[t], " test lossFunc ", test_lossFunc[t])
-
-    print ("train error ",train_error)
-    print ("test error ", test_error)
-    print ("train lossFunc ", train_lossFunc)
-    print ("test lossFunc ", test_lossFunc)
 
     #plots
 
@@ -121,27 +119,45 @@ def main(args):
     plt.savefig(img_save)
 
 
-def set_params(D,h_array):
-    best_h = h_array[0]
-    best_error = 1.
-    for h in h_array:
-        curr_error = test_h(h,D)
-        if curr_error<best_error:
-            #print ("new best error ", curr_error)
-            best_error = curr_error
-            best_h = h
-    print ("############")
+def set_params(D):
+    #h are saved as (threshold,pixel,option)
+    curr_estimator_plus = (0, 0, 0) #if pixel <= 0 predict 1 (if > 0 predict -1)
+    curr_estimator_minus = (0, 0, 1) #if pixel <= 0 predict -1 (if > 0 predict 1)
+    best_h = curr_estimator_plus
+
+    curr_error_plus = test_h((0, 0, 0),D)
+    curr_error_minus = test_h((0, 0, 1),D)
+    best_error = curr_error_plus
+
+    for pixel in range(pixels_num):
+        curr_estimator_plus = (sorted_pixels[pixel][0], pixel, 0)  # if pixel <= 256 predict 1
+        curr_estimator_minus = (sorted_pixels[pixel][0], pixel, 1)  # if pixel <= 256 predict -1
+        curr_error_plus = test_h((curr_estimator_plus),D)
+        curr_error_minus = test_h((curr_estimator_minus),D)
+        for threshold in range (1,samples_num):# the sample pixels are the threholds
+            curr_estimator_plus = (sorted_pixels[pixel][threshold], pixel, 0)
+            curr_estimator_minus = (sorted_pixels[pixel][threshold], pixel, 1)
+            if sorted_pixels[pixel][threshold] == sorted_pixels[pixel][threshold-1]:
+                continue
+            curr_error_plus -= sorted_pixel_labels[pixel][threshold] * D[idx[pixel][threshold]]
+            curr_error_minus += sorted_pixel_labels[pixel][threshold] * D[idx[pixel][threshold]]
+            if best_error > curr_error_plus:
+                best_error = curr_error_plus
+                best_h = curr_estimator_plus
+            if best_error > curr_error_minus:
+                best_error = curr_error_minus
+                best_h = curr_estimator_minus
+
     b = (1. -best_error)/best_error
     alpha = 0.5 * math.log((1. -best_error)/best_error)
     D = np.array([D[i]*math.exp(-alpha) if train_labels[i] == hypothesys(train_data[i],best_h)
-                  else D[i]*math.exp(alpha) for i in range (m)])
+                  else D[i]*math.exp(alpha) for i in range (samples_num)])
     D = np.array([d / D.sum() for d in D])
-    print ("best error", best_error," alpha ", alpha," D[1:10]", D[1:10])
     return (best_h,best_error,alpha,D)
 
 
 def test_h(h,D):
-    return (np.dot(np.array([hypothesys(train_data[i],h) != train_labels[i] for i in range (m)]),D))
+    return (np.dot(np.array([hypothesys(train_data[i],h) != train_labels[i] for i in range (samples_num)]),D))
 
 #returns the error
 def test_H(H,alphas,T,is_train):
@@ -155,7 +171,6 @@ def test_H(H,alphas,T,is_train):
         for t in range (T+1):
             coef+=alphas[t]*hypothesys(data[i],H[t])
         y_hat = np.append(y_hat,sign(coef))
-        #y_hat = np.append(y_hat, sign( np.array(alphas[t]*hypothesys(data[i],H[t]) for t in range(T+1)).sum() ) )
     return (np.array([y_hat[i] != labels[i] for i in range(len)]).mean())
 
 def calcLossFunc(H,alphas,T,is_train):
