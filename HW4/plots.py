@@ -12,7 +12,30 @@ import pandas as pd
 from scipy import stats
 
 def main():
-    #a = [1, 2, 3, 4, 5]
+    a = [1, 2, 3, 4, 5]
+    b = [1, 4, 9, 16, 25]
+    plt.figure(1)
+    plt.title('hhhhhhhhhhhhhhhhhhhhhhhhhh')
+    i = 231
+    plt.subplot(i)
+    plt.plot(a,b)
+    plt.title ('1')
+    plt.subplot(232)
+    plt.plot(a, b)
+    plt.title('2')
+    plt.subplot(233)
+    plt.plot(a, b)
+    plt.title('3')
+    plt.subplot(234)
+    plt.plot(a, b)
+    plt.title('4')
+    plt.subplot(235)
+    plt.plot(a, b)
+    plt.title('5')
+    plt.subplot(236)
+    plt.plot(a, b)
+    plt.title('6')
+    plt.show()
     #aa = pd.DataFrame({'a':[1,2,np.nan], 'b':[np.nan,1,np.nan], 'c':[5,6,7], 'd':[np.nan,np.nan,np.nan]})
     # print ('shape ',aa.shape[0] * 2 / 2)
     # print ('shape div ',aa.shape[0] * 1 / 2)

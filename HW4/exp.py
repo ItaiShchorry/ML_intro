@@ -31,28 +31,46 @@ def main():
     print ("hhh", h(x1))
     print ("hhh", h(x2))
 
+    options = [0,1]
     thresholds = [0]
     pixels = [0,1,2]
+    h_arr = [(i,j) for i in thresholds for j in pixels]
     h_array = np.array([])
-    for i in thresholds:
-        for j in pixels:
-            h_array = np.append(h_array, lambda x: 1. if x[j] < i else -1.)
-            h_array = np.append(h_array, lambda x: -1. if x[j] < i else 1.)
+    #h_array = np.append(h_array, lambda x, k=j, m=i: 1. if x[k] < i else -1.)
+    #for i in thresholds:
+     #   for j in pixels:
+      #      h_array = np.append(h_array, lambda x: 1. if (x[j] < i) else -1.)
+       #     h_array = np.append(h_array, lambda x: -1. if (x[j] < i) else 1.)
+        #    h_array = np.append(h_array, lambda x, k=j, m=i: 1. if x[k] < i else -1.)
             #h = lambda x: pos_under(x, j, i)
             #h_array = np.append(h_array,h)
             #h = lambda x: pos_over(x, j, i)
             #h_array = np.append(h_array,h)
-    for i in range(len(h_array)):
-        print ("h", i, " x1:", h_array[i](x1))
-        print ("h", i, " x2:", h_array[i](x2))
+    #for i in range(len(h_array)):
+    #    print ("h", i, " x1:", h_array[i](x1))
+    #    print ("h", i, " x2:", h_array[i](x2))
+    print (hypothesys(x1, (0,0,0)))
+    print (hypothesys(x2, (0,0,0)))
+    print (hypothesys([-1,0,0], (0,0,0)))
+    print (hypothesys([-0,0,0], (0,0,0)))
+    print (hypothesys([1,0,0], (0,0,0)))
+    print (hypothesys([2,0,0], (0,0,0)))
+    print (hypothesys([3,0,0], (0,0,0)))
 
-def pos_under(x, j, i):
+
+def hypothesys(x, (i,j,k)):
+    if k == 0:
+        return pos_under(x, (i,j))
+    else:
+        return pos_over(x, (i, j))
+
+def pos_under(x, (i,j)):
     if x[j] <= i:
         return (1.)
     else:
         return (-1.)
 
-def pos_over(x, j, i):
+def pos_over(x, (i,j)):
     if x[j] <= i:
         return (-1.)
     else:
