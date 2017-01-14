@@ -94,6 +94,7 @@ def main(args):
     X_hat_50 = np.matmul(np.matmul(eigan_vectors[:50].T, eigan_vectors[:50]), images.T).T
     output_plots_E([images, X_hat_10, X_hat_30, X_hat_50], output)
 
+
 def PCA(data, dims_rescaled_data=2):
     data -= data.mean(axis=0)
     R = np.cov(data, rowvar=False)

@@ -79,8 +79,8 @@ def main(args):
         print ("iteration ", t + 1 ," train error ",train_error[t]," test error ",test_error[t])
         print ("iteration ", t + 1, " train lossFunc ", train_lossFunc[t], " test lossFunc ", test_lossFunc[t])
 
-    #plots
 
+    #plots
     plt.figure(1)
     plt.plot(t_array, train_error)
     plt.xlabel('t')
