@@ -92,9 +92,6 @@ def main(args):
     X_hat_10 = np.matmul(np.matmul(eigan_vectors[:10].T, eigan_vectors[:10]), images.T).T
     X_hat_30 = np.matmul(np.matmul(eigan_vectors[:30].T, eigan_vectors[:30]), images.T).T
     X_hat_50 = np.matmul(np.matmul(eigan_vectors[:50].T, eigan_vectors[:50]), images.T).T
-    #for i in range (4):
-    #    output_plots_E([images[i],X_hat_10[i],X_hat_30[i],X_hat_50[i]],i,output)
-
     output_plots_E([images, X_hat_10, X_hat_30, X_hat_50], output)
 
 def PCA(data, dims_rescaled_data=2):
@@ -148,17 +145,6 @@ def output_plots_E(image_constructions,output):
     title_array = ["original", "k=10", "k=30", "k=50"]
     image_headers = ["pos image 1","pos image 2","neg image 1","neg image 2"]
     for image_index in range(4):
-
-        # if (image_index == 0):
-        #     head = "pos image 1"
-        # elif (image_index == 1):
-        #     head = "pos image 2"
-        # elif (image_index == 2):
-        #     head = "neg image 1"
-        # elif (image_index == 3):
-        #     head = "neg image 2"
-
-    #plt.figure(8 + image_index)
         for i in range (4):
             plt.subplot2grid((4,4),(image_index,i))
             if (image_index == 0):

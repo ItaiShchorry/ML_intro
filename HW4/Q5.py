@@ -39,7 +39,6 @@ pixels_num = train_data.shape[1]
 sorted_pixels = [[1. for i in range(samples_num)] for j in range(pixels_num)]
 sorted_pixel_labels = [[1. for i in range(samples_num)] for j in range(pixels_num)]
 idx = [[1. for i in range(samples_num)] for j in range(pixels_num)]
-# Dist = np.array([(1. / samples_num) for i in range(samples_num)])
 #preprocessing phase for weak learners
 for pixel in range(pixels_num):
     idx[pixel] = np.argsort([train_data[sample_index][pixel] for sample_index in range(samples_num)])
@@ -60,11 +59,7 @@ def main(args):
         output = ''
 
     # Section A
-    print (np.array(idx).shape)
-    print (np.array(sorted_pixels).shape)
-    print (np.array(sorted_pixel_labels).shape)
     D = np.array([(1. / samples_num) for i in range(samples_num)])
-    print (D[1:5])
     T=50
     H = []
     alphas = []
@@ -125,13 +120,13 @@ def set_params(D):
     curr_estimator_minus = (0, 0, 1) #if pixel <= 0 predict -1 (if > 0 predict 1)
     best_h = curr_estimator_plus
 
-    curr_error_plus = test_h((0, 0, 0),D)
-    curr_error_minus = test_h((0, 0, 1),D)
+    curr_error_plus = test_h(curr_estimator_plus,D)
+    curr_error_minus = test_h(curr_estimator_minus,D)
     best_error = curr_error_plus
 
     for pixel in range(pixels_num):
-        curr_estimator_plus = (sorted_pixels[pixel][0], pixel, 0)  # if pixel <= 256 predict 1
-        curr_estimator_minus = (sorted_pixels[pixel][0], pixel, 1)  # if pixel <= 256 predict -1
+        curr_estimator_plus = (sorted_pixels[pixel][0], pixel, 0)
+        curr_estimator_minus = (sorted_pixels[pixel][0], pixel, 1)
         curr_error_plus = test_h((curr_estimator_plus),D)
         curr_error_minus = test_h((curr_estimator_minus),D)
         for threshold in range (1,samples_num):# the sample pixels are the threholds
@@ -185,20 +180,20 @@ def calcLossFunc(H,alphas,T,is_train):
         losses.append(math.exp(-labels[i]*coef))
     return np.array(losses).mean()
 
-def hypothesys(x, (i, j, k)):
-    if k == 0:
-         return pos_under(x, (i, j))
+def hypothesys(x, h):
+    if h[2] == 0:
+         return pos_under(x, h)
     else:
-         return pos_over(x, (i, j))
+         return pos_over(x, h)
 
-def pos_under(x, (i, j)):
-    if x[j] <= i:
+def pos_under(x, h):
+    if x[h[1]] <= h[0]:
         return (1.)
     else:
         return (-1.)
 
-def pos_over(x, (i, j)):
-    if x[j] <= i:
+def pos_over(x, h):
+    if x[h[1]] <= h[0]:
         return (-1.)
     else:
         return (1.)
