@@ -39,6 +39,7 @@ pixels_num = train_data.shape[1]
 sorted_pixels = [[1. for i in range(samples_num)] for j in range(pixels_num)]
 sorted_pixel_labels = [[1. for i in range(samples_num)] for j in range(pixels_num)]
 idx = [[1. for i in range(samples_num)] for j in range(pixels_num)]
+
 #preprocessing phase for weak learners
 for pixel in range(pixels_num):
     idx[pixel] = np.argsort([train_data[sample_index][pixel] for sample_index in range(samples_num)])
@@ -116,34 +117,38 @@ def main(args):
 
 def set_params(D):
     #h are saved as (threshold,pixel,option)
-    curr_estimator_plus = (0, 0, 0) #if pixel <= 0 predict 1 (if > 0 predict -1)
-    curr_estimator_minus = (0, 0, 1) #if pixel <= 0 predict -1 (if > 0 predict 1)
-    best_h = curr_estimator_plus
-
-    curr_error_plus = test_h(curr_estimator_plus,D)
-    curr_error_minus = test_h(curr_estimator_minus,D)
-    best_error = curr_error_plus
+    best_h = (0,0,0)
+    best_error = 1
 
     for pixel in range(pixels_num):
-        curr_estimator_plus = (sorted_pixels[pixel][0], pixel, 0)
-        curr_estimator_minus = (sorted_pixels[pixel][0], pixel, 1)
+        curr_threshold = sorted_pixels[pixel][0]
+        curr_estimator_plus = (curr_threshold, pixel, 0)#if pixel <= curr_threshold predict 1 (if > 0 predict -1)
+        curr_estimator_minus = (curr_threshold, pixel, 1)#if pixel <= curr_threshold predict -1 (if > 0 predict 1)
         curr_error_plus = test_h((curr_estimator_plus),D)
         curr_error_minus = test_h((curr_estimator_minus),D)
-        for threshold in range (1,samples_num):# the sample pixels are the threholds
-            curr_estimator_plus = (sorted_pixels[pixel][threshold], pixel, 0)
-            curr_estimator_minus = (sorted_pixels[pixel][threshold], pixel, 1)
-            if sorted_pixels[pixel][threshold] == sorted_pixels[pixel][threshold-1]:
-                continue
-            curr_error_plus -= sorted_pixel_labels[pixel][threshold] * D[idx[pixel][threshold]]
-            curr_error_minus += sorted_pixel_labels[pixel][threshold] * D[idx[pixel][threshold]]
+        thresh_idx = 1
+        while ((thresh_idx < samples_num) and (sorted_pixels[pixel][thresh_idx] == curr_threshold)):
+            thresh_idx += 1
+        while thresh_idx<samples_num:# the sample pixels are the threholds
+            curr_threshold = sorted_pixels[pixel][thresh_idx]
+            curr_estimator_plus = (curr_threshold, pixel, 0)
+            curr_estimator_minus = (curr_threshold, pixel, 1)
+            curr_error_plus -= sorted_pixel_labels[pixel][thresh_idx] * D[idx[pixel][thresh_idx]]
+            curr_error_minus += sorted_pixel_labels[pixel][thresh_idx] * D[idx[pixel][thresh_idx]]
+            thresh_idx+=1
+            #deal with consecutive sample pixels with same value
+            while ((thresh_idx < samples_num) and not (sorted_pixels[pixel][thresh_idx] > curr_threshold)):
+                curr_error_plus -= sorted_pixel_labels[pixel][thresh_idx] * D[idx[pixel][thresh_idx]]
+                curr_error_minus += sorted_pixel_labels[pixel][thresh_idx] * D[idx[pixel][thresh_idx]]
+                thresh_idx+=1
+            # Peek best h
             if best_error > curr_error_plus:
                 best_error = curr_error_plus
                 best_h = curr_estimator_plus
             if best_error > curr_error_minus:
                 best_error = curr_error_minus
                 best_h = curr_estimator_minus
-
-    b = (1. -best_error)/best_error
+    # Update D
     alpha = 0.5 * math.log((1. -best_error)/best_error)
     D = np.array([D[i]*math.exp(-alpha) if train_labels[i] == hypothesys(train_data[i],best_h)
                   else D[i]*math.exp(alpha) for i in range (samples_num)])
@@ -154,12 +159,12 @@ def set_params(D):
 def test_h(h,D):
     return (np.dot(np.array([hypothesys(train_data[i],h) != train_labels[i] for i in range (samples_num)]),D))
 
-#returns the error
+# returns the error
+# the probability of predicting 0 is 0 so we can use the sign function
 def test_H(H,alphas,T,is_train):
     data = train_data if is_train else test_data
     labels = train_labels if is_train else test_labels
     len = train_data.shape[0] if is_train else test_data.shape[0]
-    # the probability of predicting 0 is 0 so we can use the sign function
     y_hat = np.array([])
     for i in range(len):
         coef = 0
@@ -197,7 +202,6 @@ def pos_over(x, h):
         return (-1.)
     else:
         return (1.)
-    #return ( np.array([math.exp(-labels[i]*np.array((alphas[t] * H[t](data[i])) for t in range(T)).sum()) for i in range(len)]).mean() )
 
 if __name__ == '__main__':
     main(sys.argv[1:])
