@@ -88,7 +88,7 @@ def main(args):
     plt.xlabel('t')
     plt.ylabel('error')
     plt.title('Training error by iterations number')
-    img_save = output + 'training error'
+    img_save = output + 'training_error'
     plt.savefig(img_save)
 
     plt.figure(2)
@@ -96,7 +96,7 @@ def main(args):
     plt.xlabel('t')
     plt.ylabel('error')
     plt.title('Test error by iterations number')
-    img_save = output + 'test error'
+    img_save = output + 'test_error'
     plt.savefig(img_save)
 
     plt.figure(3)
@@ -104,7 +104,7 @@ def main(args):
     plt.xlabel('t')
     plt.ylabel('loss function')
     plt.title('Training loss function by iterations number')
-    img_save = output + 'training loss function'
+    img_save = output + 'training_loss_function'
     plt.savefig(img_save)
 
     plt.figure(4)
@@ -112,7 +112,7 @@ def main(args):
     plt.xlabel('t')
     plt.ylabel('loss function')
     plt.title('Test loss function by iterations number')
-    img_save = output + 'test loss function'
+    img_save = output + 'test_loss_function'
     plt.savefig(img_save)
 
 

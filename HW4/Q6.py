@@ -98,14 +98,14 @@ def main(args):
 
 
 def PCA(data, dims_rescaled_data=2):
-     R = np.cov(data, rowvar=False)
-     evals, evecs = LA.eigh(R)
-     idx = np.argsort(evals)[::-1]
-     evecs = evecs[:, idx]
-     evals = evals[idx]
-     evals = evals[:dims_rescaled_data]
-     evecs = evecs[:, :dims_rescaled_data].T
-     return evals, evecs
+    R = np.cov(data, rowvar=False)
+    evals, evecs = LA.eigh(R)
+    idx = np.argsort(evals)[::-1]
+    evecs = evecs[:, idx]
+    evals = evals[idx]
+    evals = evals[:dims_rescaled_data]
+    evecs = evecs[:, :dims_rescaled_data].T
+    return evals, evecs
 
 
 def output_plots_A_B_C(eigan_values, mean_vector, eigan_vectors, output, section):
@@ -128,7 +128,7 @@ def output_plots_A_B_C(eigan_values, mean_vector, eigan_vectors, output, section
         plt.subplot(i)
         plt.title(head + ' eigan vector %d' % (i - 231))
         plt.imshow(reshape(eigan_vectors[i - 232], (28, 28)), cmap='gray', interpolation='nearest')
-    img_save = output + "Q6_section_" + section + "_" + head + "_eigan_vectors"
+    img_save = output + "Q6_section_" + section + "_" + head + "_eigenvectors"
     plt.savefig(img_save)
 
     # plotting eigan values
@@ -138,7 +138,7 @@ def output_plots_A_B_C(eigan_values, mean_vector, eigan_vectors, output, section
     plt.ylabel('eigan_value')
     plt.title('Eigan values of ' + head + ' samples by dimensions')
     plt.plot(dimensions_array, eigan_values)
-    img_save = output + "Q6_section_" + section + "_" + head + "_eigan_values"
+    img_save = output + "Q6_section_" + section + "_" + head + "_eigenvalues"
     plt.savefig(img_save)
 
 
